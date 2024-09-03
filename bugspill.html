@@ -1,0 +1,148 @@
+<!doctype html> <!-- Forteller at koden er html 5 -->
+<html lang="no"> <!--Angir hvilket språk siden er på-->
+<head>  <!--Metainformasjon om siden-->
+    <title>Fanetittel på siden</title>
+    <meta charset="utf-8"> <!--bla. for å vise æ,ø,å-->
+    <style>
+        body { background-color: lightgray; }
+        #container { background-color: lightgray; }
+        #spillbrett {
+            background-color: white;
+            width: 800px;
+            height: 600px;
+            position: relative;
+            border: 2px solid black;
+        }
+
+        .røde, .gule {
+            position: absolute;
+            border-radius: 50px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .røde { background-color: red; }
+
+        .gule { background-color: yellow; }
+
+        #gameover {
+            visibility: hidden;
+            border: 2px solid black;
+            position: absolute;
+            top: 200px;
+            left: 300px;
+            padding: 20px;
+            background-color: lightgray;
+        }
+
+        #info {
+            font-size: 1.5em;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Mos bugsa</h1>
+        <div id="info"></div>
+        <div id="spillbrett">
+            <button onclick="startSpill()">Start spillet</button>
+            <div class="røde"></div>
+        </div>
+        <div id="poeng">Poeng:</div>
+        <div id="gameover">
+            <h4>Game over</h4>
+            <button onclick="startSpill()">spill igjen</button>
+        </div>
+    </div>
+    <script>
+        let bugsArray;
+        let poeng;
+        let antIgjen;
+        let farge;
+        const SPILLETID = 30000;
+        const MAKSBUGS = 800;
+        let bugklasse = ["røde", "gule"];
+        let spillbrettE = document.querySelector("#spillbrett");
+        let poengE = document.querySelector("#poeng");
+        let infoE = document.querySelector("#info");
+
+        /**
+         * Gjemmer "game over" skjermen, resetter poeng, velger en bug array og starter "ny runde" funksjonen
+         */
+        function startSpill() {
+            spillbrettE.innerHTML = "";
+            document.querySelector("#gameover").style.visibility = "hidden";
+            poeng = 0;
+            bugsArray = [];
+            setTimeout(gameover, SPILLETID);
+            nyRunde();
+        }
+
+        /**
+         * tilbakestiller spillet, genererer bugs med tilfeldige posisjoner og farger.
+         * Teller hvor mange som matcher den valgte fargen, og tegner dem deretter på brettet.
+         */
+        function nyRunde() {
+            antIgjen = 0;
+            bugsArray = [];
+            spillbrettE.innerHTML = "";
+
+            let className = bugklasse[randInt(0, bugklasse.length - 1)];
+            farge = className;
+            infoE.innerHTML = "Men bare de " + farge + " bugsa";
+
+            for (let i = 0; i < MAKSBUGS; i++) {
+                if (farge == className) {
+                    antIgjen++;
+                }
+                let left = randInt(25, 775) + "px";
+                let top = randInt(25, 575) + "px";
+                let nyBug = { klasse: className, venstre: left, topp: top };
+                bugsArray.push(nyBug);
+                className = bugklasse[randInt(0, bugklasse.length - 1)];
+            }
+            console.log(antIgjen);
+            tegnOppBugs();
+        }
+
+        /**
+         * oppretter og plasserer bugs på spillebrettet. 
+         * Legger til klikkhendelser som øker poengsummen og skjuler riktige bugs, samt starter en ny runde når alle er klikket.
+         */ 
+        function tegnOppBugs() {
+            console.log("tegnOppBugs");
+            for (let i = 0; i < bugsArray.length; i++) {
+                let nyBug = document.createElement("div");
+                nyBug.className = bugsArray[i].klasse;
+                nyBug.style.left = bugsArray[i].venstre;
+                nyBug.style.top = bugsArray[i].topp;
+                console.log(nyBug);
+                spillbrettE.appendChild(nyBug);
+
+                if (bugsArray[i].klasse == farge) {
+                    nyBug.addEventListener("click", function () {
+                        console.log("lytteren fungerer");
+                        poeng++;
+                        poengE.innerHTML = "poeng:" + poeng;
+                        antIgjen--;
+                        if (antIgjen == 0) {
+                            nyRunde();
+                        }
+                        nyBug.style.visibility = "hidden";
+                    });
+                }
+            }
+        }
+
+        function randInt(fom, tom) {
+            return Math.floor(Math.random() * (tom - fom + 1) + fom);
+        }
+
+        function gameover() {
+            document.querySelector("#gameover").style.visibility = "visible";
+        }
+    </script>
+
+</body>
+</html>

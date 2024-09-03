@@ -1,0 +1,141 @@
+<!doctype html> <!-- Forteller at koden er html 5 -->
+<html lang="no"> <!--Angir hvilket språk siden er på-->
+<head>  <!--Metainformasjon om siden-->
+    <title>Bugspill</title>
+    <meta charset="utf-8"> <!--bla. for å vise æ,ø,å-->
+    <style>
+      body{background-color: lightgray;}
+      #container{
+        background-color: lightgray;
+      }
+      #spillbrett{
+        background-color:white;
+        width: 800px;
+        height: 600px;
+        position: relative;
+        border: 2px solid black;
+      }
+       
+      .røde, .gule{
+        position: absolute;
+        border-radius: 50px;
+        width: 50px;
+        height: 50px;
+      }
+      .røde{background-color:red; }
+      .gule{background-color:yellow;}
+      #gameover{
+        visibility: hidden;
+        border: 2px solid black;
+        position: absolute;
+        top: 200px;
+        left: 300px;
+        padding: 20px;
+        background-color:lightgray;
+      }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Mos bugsa</h1>
+        <div id="info"></div>
+        <div id="spillbrett">
+            <button onclick="startSpill()">Start spill</button>
+        </div>
+        <div id="poeng">Poeng: </div>
+        <div id="gameover">
+            <h4>Game over!</h4>
+            <button onclick="startSpill()">Spill igjen</button> 
+        </div>
+    </div>
+    <script>
+        let bugsArray;  //Array som tar vare på alle bugsene
+        let poeng;      // Teller poengene
+        let antIgjen;   // Hvor mange bugs som er igjen av riktig farge
+        let farge;      // Hvilken farge på bugsene som skal moses i denne runden.    
+        const SPILLETID = 30000;  //Lengden på hele spillet
+        const MAKSBUGS = 5;       //Totale antallet bugs på scenen
+        let bugklasse = ["røde","gule"];     //Hvilke fargeklasser bugsene kan ha
+        let spillbrettE = document.querySelector("#spillbrett");
+        let poengE = document.querySelector("#poeng");
+        let infoE = document.querySelector("#info");
+  
+
+        function startSpill(){
+            spillbrettE.innerHTML ="";
+            document.querySelector("#gameover").style.visibility = "hidden";
+            poeng = 0;
+            bugsArray = [];
+            setTimeout(gameOver, SPILLETID);
+            nyRunde();
+        }
+
+
+        function nyRunde(){
+            bugsArray = [];
+            spillbrettE.innerHTML =""; //Fjerner alt på spillbrettet før hver runde
+            antIgjen = 0;  //antall bugs igjen med den riktige fargen
+            let className = bugklasse[randInt(0,bugklasse.length-1)]; //Random farge
+            farge= className;  //Setter bug fargen som skal moses i denne runden
+            infoE.innerHTML = "kun de "+farge+" bugsa";   //Info til spiller om hvilken farge bugs de skal mose
+            for(let i=0; i<MAKSBUGS; i++){  
+                if(farge == className){   
+                    antIgjen++;   //teller opp hvor mange det er av denne fargen bugs
+                }
+                let left = randInt(50,750)+"px";   //Tilfeldig plassering i x-retning
+                let top = randInt(50,550)+"px";    //tilfeldig plassering i y-retning
+                let nyBug = {klasse: className, venstre: left, topp: top};  
+                bugsArray.push(nyBug);   
+                className = bugklasse[randInt(0,bugklasse.length-1)];  //Random farge på neste bug
+            }
+            console.log(antIgjen);
+            tegnOppBugs();
+        }
+
+
+        function tegnOppBugs(){
+            for(let i=0; i<bugsArray.length; i++){
+                let nyBug = document.createElement("div");
+                nyBug.className = bugsArray[i].klasse;
+                nyBug.style.left = bugsArray[i].venstre;
+                nyBug.style.top = bugsArray[i].topp;
+                //console.log(bugsArray[i].klasse +" == "+ farge);
+                if(bugsArray[i].klasse == farge){
+                    nyBug.addEventListener("click", function (){
+                        //console.log("Lytter funker");
+                        poeng++;
+                        poengE.innerHTML = "Poeng: "+poeng;
+                        antIgjen--;
+                        if(antIgjen == 0){  //Hvis det ikke er flere bugs i riktig farge igjen
+                            nyRunde();      //Start en ny runde
+                        }
+                        nyBug.style.visibility = "hidden";  //Sett at den moste buggen er usynlig
+                    });
+                }
+                spillbrettE.appendChild(nyBug);
+            }
+        }
+
+        
+        function gameOver(){
+            spillbrettE.innerHTML = "";
+            document.querySelector("#gameover").style.visibility = "visible";
+        }
+
+
+        /** 
+         * Finner et tilfeldig heltall mellom og inkludert oppgitte verdier 
+         *
+         * parameter (Number) fom   fra og med verdi
+         * parameter (Number) tom   til og med verdi
+         * 
+         * Returnerer (Number) tilfeldig heltall
+         */
+         function randInt(fom,tom){
+           return Math.floor(Math.random()*(tom-fom+1)+fom);
+        }
+
+
+    </script>
+</body>
+</html> 
